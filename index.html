@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donasi</title>
+    <title>Donasi QRIS</title>
     <link href="https://rafanstr.github.io/donate/Anime_Girl.png" rel="stylesheet">
     <style>
         body {
@@ -12,7 +12,7 @@
             padding: 0;
             color: #fff;
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                        url('https://upload.wikimedia.org/wikipedia/commons/c/c2/Anime_Girl.svg') no-repeat center center fixed;
+                        url('https://rafanstr.github.io/donate/Anime_Girl.png') no-repeat center center fixed;
             background-size: cover;
             min-height: 100vh;
             display: flex;
@@ -146,55 +146,36 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Animasi petasan */
-        .firework {
+        /* Optimasi animasi petasan */
+        .firework-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .firework-particle {
             position: absolute;
             width: 5px;
             height: 5px;
             border-radius: 50%;
-            box-shadow: 0 0 10px 5px;
-            animation: explode 1s ease-out forwards;
             opacity: 0;
-            z-index: 10;
+            will-change: transform, opacity;
+            transform: translate3d(0, 0, 0);
         }
 
-        @keyframes explode {
-            0% {
-                transform: translate(0, 0);
-                opacity: 1;
-                width: 5px;
-                height: 5px;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--tx), var(--ty));
-                opacity: 0;
-                width: 2px;
-                height: 2px;
-            }
-        }
-
-        .confetti {
+        .confetti-particle {
             position: fixed;
             width: 10px;
             height: 10px;
-            background-color: #f00;
             opacity: 0;
             z-index: 10;
-            animation: confetti-fall 3s linear forwards;
-        }
-
-        @keyframes confetti-fall {
-            0% {
-                transform: translateY(-100vh) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
+            will-change: transform, opacity;
+            transform: translate3d(0, 0, 0);
         }
 
         /* Responsive design */
@@ -217,7 +198,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Halo semua.</h1>
+        <h1>Donasi Menggunakan QRIS</h1>
         <p>Dukung kami dengan memberikan donasi melalui QRIS</p>
         
         <input type="number" id="amount" placeholder="Contoh: 10000" min="1000">
@@ -238,8 +219,66 @@
         </div>
     </div>
 
+    <div id="fireworkContainer" class="firework-container"></div>
+
     <script>
         let targetAmount = 0;
+        const fireworkContainer = document.getElementById('fireworkContainer');
+        const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff', '#ff8800', '#ff0088'];
+        const confettiColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+
+        // Pooling untuk optimasi memori
+        const particlePool = [];
+        const confettiPool = [];
+        const maxParticles = 200;
+        const activeParticles = new Set();
+
+        // Inisialisasi pool
+        function initPools() {
+            for (let i = 0; i < maxParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework-particle';
+                fireworkContainer.appendChild(particle);
+                particlePool.push(particle);
+                
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti-particle';
+                fireworkContainer.appendChild(confetti);
+                confettiPool.push(confetti);
+            }
+        }
+
+        function getParticle() {
+            if (particlePool.length > 0) {
+                return particlePool.pop();
+            }
+            return null;
+        }
+
+        function getConfetti() {
+            if (confettiPool.length > 0) {
+                return confettiPool.pop();
+            }
+            return null;
+        }
+
+        function releaseParticle(particle) {
+            if (activeParticles.has(particle)) {
+                particle.style.opacity = '0';
+                particle.style.transform = 'translate3d(0, 0, 0)';
+                particlePool.push(particle);
+                activeParticles.delete(particle);
+            }
+        }
+
+        function releaseConfetti(confetti) {
+            if (activeParticles.has(confetti)) {
+                confetti.style.opacity = '0';
+                confetti.style.transform = 'translate3d(0, 0, 0)';
+                confettiPool.push(confetti);
+                activeParticles.delete(confetti);
+            }
+        }
 
         async function buatQris() {
             const amountInput = document.getElementById('amount');
@@ -258,7 +297,7 @@
                 const data = await response.json();
 
                 if (data.status === "success") {
-                    targetAmount = Number(data.data.amount); // Set targetAmount saat QRIS dibuat
+                    targetAmount = Number(data.data.amount);
                     document.getElementById('qrisResult').style.display = 'block';
                     document.getElementById('qrisImage').src = data.data.download_url;
                     document.getElementById('kodeTransaksi').innerText = data.data["kode transaksi"];
@@ -266,7 +305,6 @@
                     document.getElementById('generatedAt').innerText = data.data.generated_at;
                     document.getElementById('paymentStatus').innerText = '';
                     
-                    // Scroll ke hasil QRIS
                     document.getElementById('qrisResult').scrollIntoView({ behavior: 'smooth' });
                 } else {
                     alert('Gagal membuat QRIS, coba lagi.');
@@ -278,10 +316,12 @@
         }
 
         function createFirework(x, y) {
-            const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff', '#ff8800', '#ff0088'];
-            const particleCount = 50;
+            const particleCount = Math.min(30, particlePool.length);
             
             for (let i = 0; i < particleCount; i++) {
+                const particle = getParticle();
+                if (!particle) continue;
+                
                 const angle = Math.random() * Math.PI * 2;
                 const distance = 50 + Math.random() * 100;
                 const tx = Math.cos(angle) * distance;
@@ -290,62 +330,83 @@
                 const size = 3 + Math.random() * 4;
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 
-                const particle = document.createElement('div');
-                particle.className = 'firework';
                 particle.style.left = `${x}px`;
                 particle.style.top = `${y}px`;
                 particle.style.backgroundColor = color;
-                particle.style.setProperty('--tx', `${tx}px`);
-                particle.style.setProperty('--ty', `${ty}px`);
-                particle.style.animationDuration = `${duration}s`;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
+                particle.style.opacity = '1';
                 
-                document.body.appendChild(particle);
+                activeParticles.add(particle);
                 
-                // Hapus elemen setelah animasi selesai
-                setTimeout(() => {
-                    particle.remove();
-                }, duration * 1000);
+                requestAnimationFrame(() => {
+                    particle.style.transition = `transform ${duration}s ease-out, opacity ${duration}s ease-out`;
+                    particle.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+                    particle.style.opacity = '0';
+                });
+                
+                setTimeout(() => releaseParticle(particle), duration * 1000);
             }
         }
 
         function createConfetti() {
-            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+            const confettiCount = Math.min(50, confettiPool.length);
             
-            for (let i = 0; i < 100; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = `${Math.random() * 100}vw`;
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.width = `${5 + Math.random() * 10}px`;
-                confetti.style.height = `${5 + Math.random() * 10}px`;
-                confetti.style.animationDelay = `${Math.random() * 2}s`;
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = getConfetti();
+                if (!confetti) continue;
                 
-                document.body.appendChild(confetti);
+                const duration = 2 + Math.random() * 1;
+                const delay = Math.random() * 2;
+                const size = 5 + Math.random() * 10;
+                const color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                const rotation = Math.random() * 360;
+                const endY = 100 + Math.random() * (window.innerHeight - 100);
+                const startX = Math.random() * window.innerWidth;
                 
-                // Hapus elemen setelah animasi selesai
+                confetti.style.left = `${startX}px`;
+                confetti.style.backgroundColor = color;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                confetti.style.opacity = '1';
+                
+                activeParticles.add(confetti);
+                
                 setTimeout(() => {
-                    confetti.remove();
-                }, 3000);
+                    requestAnimationFrame(() => {
+                        confetti.style.transition = `transform ${duration}s linear, opacity ${duration}s ease-out`;
+                        confetti.style.transform = `translate3d(0, ${endY}px, 0) rotate(${rotation}deg)`;
+                        confetti.style.opacity = '0';
+                    });
+                    
+                    setTimeout(() => releaseConfetti(confetti), duration * 1000);
+                }, delay * 1000);
             }
         }
 
         function celebrate() {
-            // Buat beberapa petasan di posisi acak
-            for (let i = 0; i < 8; i++) {
+            // Batasi jumlah firework untuk performa
+            const fireworkCount = 5;
+            const delayBetween = 300;
+            
+            for (let i = 0; i < fireworkCount; i++) {
                 setTimeout(() => {
-                    const x = 100 + Math.random() * (window.innerWidth - 200);
-                    const y = 100 + Math.random() * (window.innerHeight / 2);
-                    createFirework(x, y);
-                }, i * 300);
+                    if (activeParticles.size < maxParticles * 0.8) { // Jangan overload
+                        const x = 100 + Math.random() * (window.innerWidth - 200);
+                        const y = 100 + Math.random() * (window.innerHeight / 2);
+                        createFirework(x, y);
+                    }
+                }, i * delayBetween);
             }
             
-            // Tambahkan confetti
-            createConfetti();
+            // Buat confetti sekali saja
+            if (activeParticles.size < maxParticles * 0.6) {
+                createConfetti();
+            }
             
             // Mainkan suara petasan (opsional)
             const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
+            audio.volume = 0.3; // Volume lebih rendah
             audio.play().catch(e => console.log("Autoplay prevented:", e));
         }
 
@@ -355,9 +416,9 @@
             paymentStatus.style.color = '#fff';
 
             // Ganti merchant dan key kamu
-            const merchant = 'OK589309'; // <--- Ganti
-            const apiKey = '63963571734356150589309OKCTA1E2209D4DFDBD0D0785600B911F1126'; // <--- Ganti
-            const url = `https://mutasiv2.vercel.app/check-payment?merchant=${merchant}&key=${apiKey}`;
+            const merchant = 'OK589309';
+            const apiKey = '63963571734356150589309OKCTA1E2209D4DFDBD0D0785600B911F1126';
+            const url = `https://mutasiv1.vercel.app/check-payment?merchant=${merchant}&key=${apiKey}`;
 
             try {
                 const response = await fetch(url);
@@ -375,13 +436,15 @@
                     paymentStatus.innerText = 'Pembayaran diterima! Terima kasih 🙏';
                     paymentStatus.style.color = '#4CAF50';
                     
-                    // Animasi sukses
                     paymentStatus.style.animation = 'none';
                     setTimeout(() => {
                         paymentStatus.style.animation = 'fadeIn 0.5s, pulse 1s 0.5s 2';
                     }, 10);
                     
                     // Jalankan animasi petasan
+                    if (!fireworkContainer.hasChildNodes()) {
+                        initPools();
+                    }
                     celebrate();
                 } else {
                     paymentStatus.innerText = 'Pembayaran belum dilakukan';
@@ -393,6 +456,21 @@
                 paymentStatus.style.color = '#ff6b6b';
             }
         }
+
+        // Bersihkan partikel saat tidak terlihat
+        setInterval(() => {
+            activeParticles.forEach(particle => {
+                const rect = particle.getBoundingClientRect();
+                if (rect.bottom < 0 || rect.top > window.innerHeight || 
+                    rect.right < 0 || rect.left > window.innerWidth) {
+                    if (particle.classList.contains('firework-particle')) {
+                        releaseParticle(particle);
+                    } else {
+                        releaseConfetti(particle);
+                    }
+                }
+            });
+        }, 1000);
     </script>
 </body>
 </html>
