@@ -226,8 +226,7 @@
         const fireworkContainer = document.getElementById('fireworkContainer');
         const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff', '#ff8800', '#ff0088'];
         const confettiColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
-
-        // Pooling untuk optimasi memori
+   
         const particlePool = [];
         const confettiPool = [];
         const maxParticles = 200;
@@ -287,8 +286,7 @@
                 alert("Minimal donasi Rp1");
                 return;
             }
-
-            // Ganti qrisCode sesuai dengan kode kamu
+            
             const qrisCode = "00020101021226670016COM.NOBUBANK.WWW01189360050300000879140214449214512358760303UMI51440014ID.CO.QRIS.WWW0215ID20253689485890303UMI520454115303360540312754031385802ID5918VPN STORE OK5893096011PROBOLINGGO61056721162070703A016304D13C"; 
             const url = `https://myqris.vercel.app/api/create?amount=${amount}&qrisCode=${qrisCode}`;
 
@@ -384,8 +382,7 @@
             }
         }
 
-        function celebrate() {
-            // Batasi jumlah firework untuk performa
+        function celebrate() 
             const fireworkCount = 5;
             const delayBetween = 300;
             
@@ -399,14 +396,14 @@
                 }, i * delayBetween);
             }
             
-            // Buat confetti sekali saja
+            
             if (activeParticles.size < maxParticles * 0.6) {
                 createConfetti();
             }
             
-            // Mainkan suara petasan (opsional)
+            
             const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
-            audio.volume = 0.3; // Volume lebih rendah
+            audio.volume = 0.3; 
             audio.play().catch(e => console.log("Autoplay prevented:", e));
         }
 
@@ -414,11 +411,10 @@
             const paymentStatus = document.getElementById('paymentStatus');
             paymentStatus.innerText = 'Mengecek pembayaran...';
             paymentStatus.style.color = '#fff';
-
-            // Ganti merchant dan key kamu
+            
             const merchant = 'OK589309';
             const apiKey = '63963571734356150589309OKCTA1E2209D4DFDBD0D0785600B911F1126';
-            const url = `https://mutasiv1.vercel.app/check-payment?merchant=${merchant}&key=${apiKey}`;
+            const url = `https://mutasiv2.vercel.app/check-payment?merchant=${merchant}&key=${apiKey}`;
 
             try {
                 const response = await fetch(url);
