@@ -290,7 +290,7 @@
 
             // Ganti qrisCode sesuai dengan kode kamu
             const qrisCode = "00020101021226670016COM.NOBUBANK.WWW01189360050300000879140214449214512358760303UMI51440014ID.CO.QRIS.WWW0215ID20253689485890303UMI520454115303360540312754031385802ID5918VPN STORE OK5893096011PROBOLINGGO61056721162070703A016304D13C"; 
-            const url = `https://myqris.vercel.app/api/create?amount=${amount}&qrisCode=${qrisCode}`;
+            const url = `https://myqris.vercel.app/api/create?amount=${amount}&qrisCode=${qrisCode}&centerImage=https://rafanstr.github.io/donate/Anime_Girl.png`;
 
             try {
                 const response = await fetch(url);
@@ -418,7 +418,7 @@
             // Ganti merchant dan key kamu
             const merchant = 'OK589309';
             const apiKey = '63963571734356150589309OKCTA1E2209D4DFDBD0D0785600B911F1126';
-            const url = `https://mutasiv1.vercel.app/check-payment?merchant=${merchant}&key=${apiKey}`;
+            const url = `https://mutasiv2.vercel.app/check-payment?merchant=${merchant}&key=${apiKey}`;
 
             try {
                 const response = await fetch(url);
