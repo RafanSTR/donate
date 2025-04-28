@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donasi QRIS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #fff;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1625225233840-695456021cde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 20px 0;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: #fff;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        input[type="number"] {
+            padding: 15px;
+            width: 80%;
+            max-width: 250px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        button {
+            padding: 12px 30px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #4CAF50;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background-color: #45a049;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #confirmButton {
+            background-color: #2196F3;
+        }
+
+        #confirmButton:hover {
+            background-color: #0b7dda;
+        }
+
+        img {
+            margin: 20px auto;
+            width: 250px;
+            height: 250px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background-color: white;
+            padding: 10px;
+        }
+
+        .info {
+            margin: 25px 0;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .info p {
+            margin: 10px 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .info strong {
+            color: #fff;
+        }
+
+        #paymentStatus {
+            margin: 20px 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #qrisResult {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            img {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Donasi Menggunakan QRIS</h1>
+        <p>Dukung kami dengan memberikan donasi melalui QRIS</p>
+        
+        <input type="number" id="amount" placeholder="Contoh: 10000" min="1000">
+        <br>
+        <button onclick="buatQris()">Buat QRIS</button>
+
+        <div id="qrisResult" style="display:none;">
+            <h2>Scan QRIS Berikut:</h2>
+            <img id="qrisImage" src="" alt="QRIS">
+            <div class="info">
+                <p><strong>Kode Transaksi:</strong> <span id="kodeTransaksi"></span></p>
+                <p><strong>Jumlah:</strong> Rp <span id="jumlah"></span></p>
+                <p><strong>Dibuat Pada:</strong> <span id="generatedAt"></span></p>
+            </div>
+
+            <button id="confirmButton" onclick="konfirmasiPembayaran()">Konfirmasi Pembayaran</button>
+            <p id="paymentStatus"></p>
+        </div>
+    </div>
+
+    <script>
+        let targetAmount = 0;
+
+        async function buatQris() {
+            const amountInput = document.getElementById('amount');
+            const amount = amountInput.value;
+            if (!amount || amount < 1) {
+                alert("Minimal donasi Rp1");
+                return;
+            }
+
+            // Ganti qrisCode sesuai dengan kode kamu
+            const qrisCode = "00020101021226670016COM.NOBUBANK.WWW01189360050300000879140214449214512358760303UMI51440014ID.CO.QRIS.WWW0215ID20253689485890303UMI520454115303360540312754031385802ID5918VPN STORE OK5893096011PROBOLINGGO61056721162070703A016304D13C"; 
+            const url = `https://myqris.vercel.app/api/create?amount=${amount}&qrisCode=${qrisCode}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    targetAmount = Number(data.data.amount); // Set targetAmount saat QRIS dibuat
+                    document.getElementById('qrisResult').style.display = 'block';
+                    document.getElementById('qrisImage').src = data.data.download_url;
+                    document.getElementById('kodeTransaksi').innerText = data.data["kode transaksi"];
+                    document.getElementById('jumlah').innerText = targetAmount.toLocaleString('id-ID');
+                    document.getElementById('generatedAt').innerText = data.data.generated_at;
+                    document.getElementById('paymentStatus').innerText = '';
+                    
+                    // Scroll ke hasil QRIS
+                    document.getElementById('qrisResult').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('Gagal membuat QRIS, coba lagi.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan saat menghubungi server.');
+            }
+        }
+
+        async function konfirmasiPembayaran() {
+            const paymentStatus = document.getElementById('paymentStatus');
+            paymentStatus.innerText = 'Mengecek pembayaran...';
+            paymentStatus.style.color = '#fff';
+
+            // Ganti merchant dan key kamu
+            const merchant = 'OK589309'; // <--- Ganti
+            const apiKey = '63963571734356150589309OKCTA1E2209D4DFDBD0D0785600B911F1126'; // <--- Ganti
+            const url = `https://mutasiv1.vercel.app/check-payment?merchant=${merchant}&key=${apiKey}`;
+
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.status !== 'success') {
+                    paymentStatus.innerText = 'Gagal menghubungi server mutasi.';
+                    paymentStatus.style.color = '#ff6b6b';
+                    return;
+                }
+
+                const transaksi = result.data.find(item => item.type === 'CR' && item.amount === targetAmount);
+
+                if (transaksi) {
+                    paymentStatus.innerText = 'Pembayaran diterima! Terima kasih 🙏';
+                    paymentStatus.style.color = '#4CAF50';
+                    
+                    // Animasi sukses
+                    paymentStatus.style.animation = 'none';
+                    setTimeout(() => {
+                        paymentStatus.style.animation = 'fadeIn 0.5s, pulse 1s 0.5s 2';
+                    }, 10);
+                } else {
+                    paymentStatus.innerText = 'Pembayaran belum dilakukan';
+                    paymentStatus.style.color = '#ff6b6b';
+                }
+            } catch (error) {
+                console.error(error);
+                paymentStatus.innerText = 'Terjadi kesalahan saat memeriksa pembayaran.';
+                paymentStatus.style.color = '#ff6b6b';
+            }
+        }
+    </script>
+</body>
+  </html>
